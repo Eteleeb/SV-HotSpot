@@ -74,7 +74,8 @@ plot.exp <- function (g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pats, gene,
   pval = signif(pval, digits=3)
 
   g.exp$sample.status <- factor(g.exp$sample.status, levels=c('non-SVs', 'SVs'))
-  e1 <- ggplot(g.exp, aes(x=sample.status, y=log2(gene.exp+1))) + geom_boxplot(aes(fill=sample.status)) + theme_bw() 
+  e1 <- ggplot(g.exp, aes(x=sample.status, y=log2(gene.exp+1))) 
+  e1 <- e1 + geom_boxplot(aes(fill=sample.status)) + geom_jitter(position=position_jitter(0.3)) + theme_bw() 
   e1 <- e1 + labs(x='', y=paste(gene, 'expression')) + ggtitle(paste0('\n',gene, ' expression in SV\nand non-SV samples'))
   e1 <- e1 + theme(axis.text.x=element_text(size=14, vjust=0.5, color="black"),
                    axis.text.y=element_text(size=14, color="black"), 
@@ -119,7 +120,8 @@ plot.exp <- function (g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pats, gene,
     lbls.n = grep(paste(as.character(unique(svtype.exp$grp)), collapse="|"), lbls.n, value=TRUE)
     neut.title = paste0(gene, ' expression by SV type in peak ', pk,'\n(CN neutral samples only)')
     
-    e2 <- ggplot(svtype.exp, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp)) + theme_bw() 
+    e2 <- ggplot(svtype.exp, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp)) 
+    e2 <- e2 + geom_jitter(position=position_jitter(0.3)) + theme_bw() 
     e2 <- e2 + labs(x='', y=paste(gene, 'expression')) + ggtitle(neut.title)
     e2 <- e2 + theme(axis.text.x=element_text(size=14, vjust=0.5, color="black"),
                      axis.text.y=element_text(size=14, color="black"), 
@@ -188,8 +190,8 @@ plot.exp <- function (g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pats, gene,
     
     tt = paste0(gene,' expression with the presence and\nabsence of CN at ', gene, '/peak regions')
     
-    e3 <- ggplot(g.exp, aes(x=group, y=log2(gene.exp+1))) + geom_boxplot(aes(fill=group)) + theme_bw()
-    #e3 <- e3 + stat_summary(fun.data = give.n, geom = "text", size=5) 
+    e3 <- ggplot(g.exp, aes(x=group, y=log2(gene.exp+1))) + geom_boxplot(aes(fill=group))
+    e3 <- e3 + geom_jitter(position=position_jitter(0.3)) + theme_bw() 
     e3 <- e3 + labs(x='', y=paste(gene, 'expression')) + ggtitle(tt)
     e3 <- e3 + theme(axis.text.x=element_text(size=14, vjust=0.5, color="black"),
                      axis.text.y=element_text(size=14, color="black"),
@@ -252,7 +254,8 @@ plot.exp.amp.del <- function (g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pat
     lbls.a = grep(paste(as.character(unique(svtype.exp.a$grp)), collapse="|"), lbls.a, value=TRUE)
     amp.title = paste0(gene, ' expression by SV type in peak ', pk,'\n(amplified samples only)')
     
-    a <- ggplot(svtype.exp.a, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp)) + theme_bw() 
+    a <- ggplot(svtype.exp.a, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp))
+    a <- a + geom_jitter(position=position_jitter(0.3)) + theme_bw() 
     a <- a + labs(x='', y=paste(gene, 'expression')) + ggtitle(amp.title)
     a <- a + theme(axis.text.x=element_text(size=12, vjust=0.5, color="black"),
                        axis.text.y=element_text(size=12, color="black"), 
@@ -300,7 +303,8 @@ plot.exp.amp.del <- function (g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pat
     lbls.d = grep(paste(as.character(unique(svtype.exp.d$grp)), collapse="|"), lbls.d, value=TRUE)
     del.title = paste0(gene, ' expression by SV type in peak ', pk,'\n(deleted samples only)')
                        
-    d <- ggplot(svtype.exp.d, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp)) + theme_bw() 
+    d <- ggplot(svtype.exp.d, aes(x=grp, y=log2(exp+1))) + geom_boxplot(aes(fill=grp))
+    d <- d + geom_jitter(position=position_jitter(0.3)) + theme_bw() 
     d <- d + labs(x='', y=paste(gene, 'expression')) + ggtitle(del.title)
     d <- d + theme(axis.text.x=element_text(size=12, vjust=0.5, color="black"),
                        axis.text.y=element_text(size=12, color="black"), 

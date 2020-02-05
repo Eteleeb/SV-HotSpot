@@ -25,7 +25,7 @@ my $sv_file=0;
 my $genome='hg38';
 my $sliding_w_size = 100000;
 my $sliding_w_step = 1000; 
-my $output_dir = '.';
+my $output_dir = '/data';
 my $annot_file=0;
 my $peakPick_win=100;
 my $peakPick_minsd=5;
@@ -170,7 +170,11 @@ prepare_SVs();
 identify_peaks();
 annotate_peaks();
 determine_association();
-visualize_res();
+if ($plot_top_peaks gt 0) {
+  visualize_res();
+}
+
+exit(); 
 
 ### set end time 
 my $end = localtime();

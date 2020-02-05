@@ -26,6 +26,91 @@ if (!stat_test %in% c('wilcox.test', 't.test')) {
 }
 s_test = eval(parse(text = stat_test))
 
+############################ Function to select the top peaks for each gene ##############################
+pickTopPeaks <- function (peaks, genes, total_samples) {
+  ### extract all genes 
+  assoc.genes <- unique(genes$Gene)
+  
+  ### function to extract the top peak 
+  selectTopPeak <- function (pks) {
+    top.peak <- peaks[peaks$Peak.name %in% pks, c('Peak.name', 'Start', 'End', 'Percentage.SV.samples')]
+    top.peak2 <- top.peak[top.peak$Percentage.SV.samples == max(top.peak$Percentage.SV.samples), 'Peak.name']
+    if (length(top.peak2) > 1) {
+      top.peak$len <- top.peak$End - top.peak$Start
+      top.peak2 <- top.peak[top.peak$len == min(top.peak$len), 'Peak.name']
+    }
+    return (top.peak2)
+  }
+  
+  filtered.res <- NULL
+  for (i in 1:length(assoc.genes)) {
+    g <- assoc.genes[i]
+    ### extract peaks assoicated with the gene 
+    gene.peaks <- unique(genes[genes$Gene==g, 'Peak.name']) 
+    if (length(gene.peaks) == 1) {
+      dd <- data.frame(Gene=g, Peak.name = gene.peaks)
+      filtered.res <- rbind(filtered.res, dd)
+      next
+    }
+    ### loop through al peaks and compare 
+    all.pairs = as.data.frame(t(combn(as.character(gene.peaks),2)), stringsAsFactors = F)
+    colnames(all.pairs) <- c('peak1', 'peak2')
+    all.pairs$pval <- 0
+    all.pairs$status <- NA
+    for (j in 1:nrow(all.pairs)) {
+      p1.sample <- unique(unlist(strsplit(peaks[peaks$Peak.name==all.pairs$peak1[j], 'SV.sample'], ",")))
+      p2.sample <- unique(unlist(strsplit(peaks[peaks$Peak.name==all.pairs$peak2[j], 'SV.sample'], ",")))
+      ov <- length(intersect(p1.sample, p2.sample))
+      ss <- total_samples - (length(p1.sample) - ov) - (length(p2.sample) - ov) - ov
+      
+      test.mat <-matrix(c(ov, length(p1.sample) - ov, 
+                          length(p2.sample) - ov,  ss), nrow = 2,
+                        dimnames = list(Peak1 = c("yes", "no"),
+                                        Peak2 = c("yes", "no")))
+      test.pval <- fisher.test(test.mat, alternative = "two.sided")$p.value
+      
+      all.pairs$pval[j] <- test.pval
+      if (test.pval < 0.05) { 
+        all.pairs$status[j] <- 'D'
+      } else {
+        all.pairs$status[j] <- 'I'
+      }
+      
+    }  ## end of all pairs 
+    
+    ### determine the status of the peaks
+    if (nrow(all.pairs[all.pairs$status=="I", ])==0) {
+      topPeak <- selectTopPeak(gene.peaks) 
+      d <- data.frame(Gene=g, Peak.name = topPeak)
+      filtered.res <- rbind(filtered.res, d)
+    } else {
+      dep.peaks <- all.pairs[all.pairs$status=="D", c('peak1', 'peak2')]
+      dep.peaks <- unique(c(dep.peaks$peak1, dep.peaks$peak2))
+      topPeak <- selectTopPeak(gene.peaks) 
+      d <- data.frame(Gene=g, Peak.name = topPeak)
+      filtered.res <- rbind(filtered.res, d)
+      
+      indep.peaks <- all.pairs[all.pairs$status=="I", c('peak1', 'peak2')]
+      indep.peaks <- unique(c(indep.peaks$peak1, indep.peaks$peak2))
+      
+      ### loop through the indepdendent peaks and check if they are not in the dependent group
+      for (k in 1:length(indep.peaks)) {
+        if (!indep.peaks[k] %in% dep.peaks) {
+          d2 <- data.frame(Gene=g, Peak.name = indep.peaks[k])
+          filtered.res <- rbind(filtered.res, d2)
+        }
+      } ## end of independent peaks 
+    }
+  }    ## end of all genes 
+  
+  ### filter and write results 
+  annot.pks.final <- peaks[peaks$Peak.name %in% filtered.res$Peak.name, ]
+  write.table(annot.pks.final, file=paste0(out.dir, '/annotated_peaks_summary.tsv'), sep="\t", quote=F, row.names=F)
+  genes.final <- merge(genes, filtered.res, sort =F)
+  write.table(genes.final, file=paste0(out.dir, '/genes.associated.with.SVs.tsv'), sep="\t", quote=F, row.names=F)
+}
+##########################################################################################################
+
 ### extract feature column 
 annot <- read.table(paste0(out.dir,"/processed_data/genes.bed"), header =T, sep="\t", check.names=F, comment.char = "$")
 colnames(annot) <- c('chr', 'start', 'stop', 'gene', 'score', 'strand') 
@@ -203,45 +288,45 @@ for (i in 1:nrow(res)){
     }
     ###########################################################################################################
     
-    ################################ Perform wilcoxon test for TD samples only ###############################
-    ### comp 1 (SV samples versus non-SVs samples)
-    if (length(td.pats)!=0 & length(nonSV.pats)!=0 & (length(td.pats)>=5 | length(nonSV.pats)>=5) ) {
-        TD_vs_nonTD <- s_test(g.exp[g.exp$td.status=="TD", 'gene.exp'], g.exp[g.exp$sample.status=="non-SVs", 'gene.exp'])
-        #pvals <- c(pvals, TD_vs_nonTD$p.value)
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-all', pval=TD_vs_nonTD$p.value))
-    } else {
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-all', pval=NA))
-    }
-    ### copm 2 (using gene neutral TD samples only)
-    neut.TDs = g.exp[g.exp$gene.cn.status=="neut" & g.exp$td.status=="TD",'gene.exp']
-    neut.nonTDs = g.exp[g.exp$gene.cn.status=="neut" & g.exp$sample.status=="non-SVs", 'gene.exp']
-    if(length(neut.TDs)!=0 & length(neut.nonTDs)!=0 & (length(neut.TDs)>=5 | length(neut.nonTDs)>=5 )) {
-        g.neutTD.comp <- s_test(neut.TDs, neut.nonTDs)
-        #pvals <- c(pvals, g.neutTD.comp$p.value)
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-neut', pval=g.neutTD.comp$p.value))
-    } else {
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-neut', pval=NA))
-    }
-    ### copm 3 (using gene amplified TD samples)
-    amp.TDs = g.exp[g.exp$gene.cn.status=="amp" & g.exp$td.status=="TD",'gene.exp']
-    amp.nonTDs = g.exp[g.exp$gene.cn.status=="amp" & g.exp$sample.status=="non-SVs", 'gene.exp']
-    if(length(amp.TDs)!=0 & length(amp.nonTDs)!=0 & (length(amp.TDs)>=5 | length(amp.nonTDs)>=5 )) {
-        g.ampTD.comp <- s_test(amp.TDs, amp.nonTDs)
-        #pvals <- c(pvals, g.ampTD.comp$p.value)
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-amp', pval=g.ampTD.comp$p.value))
-    } else {
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-amp', pval=NA))
-    }
-    ### copm 4 (using gene deleted TD samples only)
-    del.TDs = g.exp[g.exp$gene.cn.status=="del" & g.exp$td.status=="TD",'gene.exp']
-    del.nonTDs = g.exp[g.exp$gene.cn.status=="del" & g.exp$sdelle.status=="non-SVs", 'gene.exp']
-    if(length(del.TDs)!=0 & length(del.nonTDs)!=0 & (length(del.TDs)>=5 | length(del.nonTDs)>=5 )) {
-        g.delTD.comp <- s_test(del.TDs, del.nonTDs)
-        #pvals <- c(pvals, g.delTD.comp$p.value)
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-del', pval=g.delTD.comp$p.value))
-    } else {
-        pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-del', pval=NA))
-    }
+    # ################################ Perform wilcoxon test for TD samples only ###############################
+    # ### comp 1 (SV samples versus non-SVs samples)
+    # if (length(td.pats)!=0 & length(nonSV.pats)!=0 & (length(td.pats)>=5 | length(nonSV.pats)>=5) ) {
+    #     TD_vs_nonTD <- s_test(g.exp[g.exp$td.status=="TD", 'gene.exp'], g.exp[g.exp$sample.status=="non-SVs", 'gene.exp'])
+    #     #pvals <- c(pvals, TD_vs_nonTD$p.value)
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-all', pval=TD_vs_nonTD$p.value))
+    # } else {
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-all', pval=NA))
+    # }
+    # ### copm 2 (using gene neutral TD samples only)
+    # neut.TDs = g.exp[g.exp$gene.cn.status=="neut" & g.exp$td.status=="TD",'gene.exp']
+    # neut.nonTDs = g.exp[g.exp$gene.cn.status=="neut" & g.exp$sample.status=="non-SVs", 'gene.exp']
+    # if(length(neut.TDs)!=0 & length(neut.nonTDs)!=0 & (length(neut.TDs)>=5 | length(neut.nonTDs)>=5 )) {
+    #     g.neutTD.comp <- s_test(neut.TDs, neut.nonTDs)
+    #     #pvals <- c(pvals, g.neutTD.comp$p.value)
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-neut', pval=g.neutTD.comp$p.value))
+    # } else {
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-neut', pval=NA))
+    # }
+    # ### copm 3 (using gene amplified TD samples)
+    # amp.TDs = g.exp[g.exp$gene.cn.status=="amp" & g.exp$td.status=="TD",'gene.exp']
+    # amp.nonTDs = g.exp[g.exp$gene.cn.status=="amp" & g.exp$sample.status=="non-SVs", 'gene.exp']
+    # if(length(amp.TDs)!=0 & length(amp.nonTDs)!=0 & (length(amp.TDs)>=5 | length(amp.nonTDs)>=5 )) {
+    #     g.ampTD.comp <- s_test(amp.TDs, amp.nonTDs)
+    #     #pvals <- c(pvals, g.ampTD.comp$p.value)
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-amp', pval=g.ampTD.comp$p.value))
+    # } else {
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-amp', pval=NA))
+    # }
+    # ### copm 4 (using gene deleted TD samples only)
+    # del.TDs = g.exp[g.exp$gene.cn.status=="del" & g.exp$td.status=="TD",'gene.exp']
+    # del.nonTDs = g.exp[g.exp$gene.cn.status=="del" & g.exp$sdelle.status=="non-SVs", 'gene.exp']
+    # if(length(del.TDs)!=0 & length(del.nonTDs)!=0 & (length(del.TDs)>=5 | length(del.nonTDs)>=5 )) {
+    #     g.delTD.comp <- s_test(del.TDs, del.nonTDs)
+    #     #pvals <- c(pvals, g.delTD.comp$p.value)
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-del', pval=g.delTD.comp$p.value))
+    # } else {
+    #     pvals <- rbind(pvals, data.frame(comp='TDs-vs-nonTDs-del', pval=NA))
+    # }
     ###########################################################################################################
 
     ### extract the smallest p-value 
@@ -269,10 +354,7 @@ for (i in 1:nrow(res)){
     
   }  ### end of genes in the current peak 
   
-
 }   ### end of peaks 
-
-
 
 #### compute FDR and write all results 
 #fdr.res = p.adjust(all.genes.res$min.pval, method = "BH")
@@ -289,12 +371,15 @@ if (nrow(sig.genes) > 0 ) {
    colnames(final.res) <- c('Peak.name', 'Associated.genes')
    final.res <- merge(res, final.res, sort =F)
    final.res <- final.res[order(final.res$Percentage.SV.samples, decreasing = T), ]
-   write.table(final.res, file=paste0(out.dir, '/annotated_peaks_summary.tsv'), sep="\t", quote=F, row.names=F)
+   #write.table(final.res, file=paste0(out.dir, '/annotated_peaks_summary.tsv'), sep="\t", quote=F, row.names=F)
 
    #### write resutls for genes assoicated with SV peaks 
    pval.cols = colnames(sig.genes)[grepl(".vs.", colnames(sig.genes)) & colnames(sig.genes) !="SVs.vs.nonSVs.status"]
-   colnames(sig.genes) = c("Gene", "Peak.name", "Peak.locus", "LogFC","Min.pval",paste0(pval.cols,".pval"),"SVs.vs.nonSVs.status", "SVs.mean.exp","nonSVs.mean.exp")
-   write.table(sig.genes, file=paste0(out.dir, '/genes.associated.with.SVs.tsv'), sep="\t", quote=F, row.names=F)
+   colnames(sig.genes) = c("Peak.name", "Peak.locus", "Gene", "LogFC","Min.pval",paste0(pval.cols,".pval"),"SVs.vs.nonSVs.status", "SVs.mean.exp","nonSVs.mean.exp")
+   
+   #### filter results by selecting the top peaks based on the significance of overlap 
+   pickTopPeaks(final.res, sig.genes, length(samples.with.sv))
+   #write.table(sig.genes, file=paste0(out.dir, '/genes.associated.with.SVs.tsv'), sep="\t", quote=F, row.names=F)
 } else {
    cat(paste("No associated genes were detected using p-value cutoff of", pval, "\n"))   
 }
@@ -370,7 +455,7 @@ if (genome %in% built.in.genomes) {
   top.pks = unique(as.character(mydata.dt[mydata.dt[, .I[pct.samples==max(pct.samples)], by=p.chr]$V1]$Peak.name))
   mydata$PlotColor <- "red"
   mydata[mydata$Peak.name %in% top.pks, "PlotColor"] = "blue"
-  RCircos.Histogram.Plot(mydata, data.col=5, track.num=1, "in", min.value=0, max.value=100, )
+  RCircos.Histogram.Plot(mydata, data.col=5, track.num=1, "in", min.value=0, max.value=100 )
   ### plot legend 
   legend (-0.45,-1.4, legend=c('All peaks', 'Top peaks'), fill=c("red","blue"),  horiz = TRUE, bty="n",
           border="white", cex=0.7, x.intersp=0.5)

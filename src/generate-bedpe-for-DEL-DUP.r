@@ -1,7 +1,6 @@
 #!/usr/local/bin/Rscript
 
-# Created by: Ha X. Dang <haxdang@gmail.com>
-# Modified by: Abdallah Eteleeb <eteleeb@gmail.com>
+# Created by: Abdallah Eteleeb <eteleeb@gmail.com>
 
 args = commandArgs(T)
 
@@ -30,4 +29,3 @@ if (file.exists((sv.file))) {
 ### write the results to be overlapped with segments 
 #sv <- sv[,c('chrom1', 'pos1', 'pos2', 'sample', 'svtype')]
 write.table(sv, file=paste0(out.dir, "/processed_data/del_dup_sv.bed"), sep ="\t", quote = F, row.names = F, col.names = F)
-
