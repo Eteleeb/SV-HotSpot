@@ -550,7 +550,7 @@ sub usage
    print("\t--chip-cov\t\t\tchip-seq coverage\t<filename>\t[ chip-seq coverage file in \"BED\" foramt ]\n");
    print("\t--chip-cov-lbl\t\t\tchip-seq coverage label\t<string>\t[ label used for chip-seq coverage ]\n");
    #print("\t--roi-lbl\t\t\tregion of int. label(s)\t<string>\t[ labels used for region(s) of interest separated by comma  ]\n");
-   print("\t--plot-top-peaks\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
+   print("\t--plot-top-peaks\t\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
    print("\t--left-ext\t\t\tsize of left extension\t<int>\t\t[ size of the left extension of the peak. default: 0bp ]\n");
    print("\t--right-ext\t\t\tsize of right extension\t<int>\t\t[ size of the right extension of the peak. default: 0bp ]\n");
 
