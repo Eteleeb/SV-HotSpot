@@ -1,0 +1,47 @@
+{% set version = "1.0.2" %}
+
+package:
+  name: sv-hotspot
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/eteleeb/SV-HotSpot.git
+  git_rev: {{ version }}
+
+
+build:
+  number: 0
+  #noarch: generic
+
+requirements:
+  build:
+    #- perl >=5.10
+    #- bedtools
+    #- r-base >=3.1.0
+
+  host:
+    - perl >=5.10
+    - perl-list-moreutils
+    - bedtools ==2.29.1
+    - r-base >=3.1.0
+    - r-ggplot2
+
+  run:
+    - perl >=5.10
+    - perl-list-moreutils
+    - bedtools ==2.29.1
+    - r-base >=3.1.0
+    - r-ggplot2
+
+test:
+    commands:
+        - $R -e "library('ggplot2')"
+        - sv-hotspot.pl --help
+
+about:
+  home: https://github.com/ChrisMaherLab/SV-Hotspot
+  license: 'NA'
+  summary: 'SV-HotSpot is a Linux-based command-line pipeline that integrates multiple 
+            data types (including SVs, gene expression, and regulatory elements) to identify 
+            recurrent SVs and assess their potential consequences on the gene expression of nearby genes.'
+
