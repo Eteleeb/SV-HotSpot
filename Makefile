@@ -27,7 +27,7 @@ svhotspot: $(CONDA)
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-build
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-verify
 	git clone $(SV_HOTSPOT_URL) $(SV_HOTSPOT_LOCAL)
-	cd $(SV_HOTSPOT_LOCAL) && git checkout -b docker-conda origin/docker-conda
+	#cd $(SV_HOTSPOT_LOCAL) && git checkout -b docker-conda origin/docker-conda
 	cd $(SV_HOTSPOT_LOCAL) && $(CONDA) build sv-hotspot
 	cd $(SV_HOTSPOT_LOCAL) && cp $(CONDA_BUILD_PATH)/sv-hotspot-*.tar.bz2 ..
 #	source $(CONDA_PROFILE) && $(CONDA) activate $(SVHOTSPOT_ENV)
