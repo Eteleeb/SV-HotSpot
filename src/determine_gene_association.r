@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Find regions/peaks whose SVs altered expression of the downstream genes
 # Written by Abdallah Eteleeb <eteleeb@gmail.com> 
