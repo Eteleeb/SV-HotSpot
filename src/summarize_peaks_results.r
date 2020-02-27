@@ -27,15 +27,15 @@ colnames(all.bp) <- c('p.chr', 'p.start', 'p.stop', 'p.name', 'p.id', 'num.sampl
 all.bp <- unique(all.bp)
 sv.type.counts <- count(all.bp, c('p.name', 'sv.type'))
 
-pct.sv.fun <- function (pk, w){
+pct.sv.fun <- function (pk,w,num.sam){
    p.sv <- sv.type.counts[sv.type.counts$p.name==pk, ]
    dom.svtype <- p.sv[p.sv$freq == max(p.sv$freq),"sv.type"]
    dom.svtype <- paste(dom.svtype, collapse = "|")
-   num.sam <- length(unique(all.bp[all.bp$p.name==pk, 'sample']))
-   density <- num.sam/w
+   #num.sam <- length(unique(all.bp[all.bp$p.name==pk, 'sample']))
+   #density <- num.sam/w
    num.sv.types<- sum(p.sv$freq)
    p.sv$pct.sv <- paste0(p.sv$sv.type, '(', signif((p.sv$freq/num.sam)*100, digits = 4), '%)')
-   dd <- data.frame(p.name=pk, num.samples = num.sam, density, pct.sv.types = paste(p.sv$pct.sv, collapse = "|"), dom.svtype)
+   dd <- data.frame(p.name=pk, pct.sv.types = paste(p.sv$pct.sv, collapse = "|"), dom.svtype)
     
    return (dd)
 }
@@ -51,7 +51,7 @@ if (file.exists(paste0(out.dir,'/processed_data/peaks_with_overlap_nearby_genes.
    colnames(p.with.genes) = c('p.chr', 'p.start', 'p.stop', 'p.name', 'p.id', 'num.samples', 'pct.samples', 'sample',
                               'g.chr', 'g.start', 'g.stop', 'gene', 'g.score', 'g.strand', 'dist','g.pos')
 } else {
-  stop ('peaks_with_overlap_nearby_genes.tsv file was not found!. Makr sure all previous steps were run correctly.')
+  stop ('peaks_with_overlap_nearby_genes.tsv file was not found!. Make sure all previous steps were run correctly.')
 }
 
 ##### read peaks overlap/nearby region of interest
@@ -74,15 +74,15 @@ for (i in 1:nrow(all.peaks)) {
   p.width <- abs(p.res$p.stop- p.res$p.start)
   
   #### compute percentage of sv types 
-  pct.sv <- pct.sv.fun(pk, p.width)  
+  pct.sv <- pct.sv.fun(pk, p.width, p.res$num.samples) 
   p.res <- merge(p.res, pct.sv)
-  p.res <- p.res[, c("p.name", "p.chr", "p.start", "p.stop", "num.samples", "pct.samples", "sample", "pct.sv.types", "density", "dom.svtype")]
+  p.res <- p.res[, c("p.name", "p.chr", "p.start", "p.stop", "num.samples", "pct.samples", "sample", "pct.sv.types", "dom.svtype")]
 
   ### extract overlapped/nearby genes 
   ov.genes <- unique(p.with.genes[p.with.genes$p.name==pk & p.with.genes$g.pos=="overlap", 'gene'])
   nearby.genes <- unique(p.with.genes[p.with.genes$p.name==pk & p.with.genes$g.pos=="nearby", 'gene'])
   
-  ### extract overlapped region of interes 
+  ### extract overlapped region of interest
   if (is.roi.avail) {
      ov.roi = NULL
      for (k in 1:length(roi.name.cols)) { 
@@ -102,20 +102,21 @@ for (i in 1:nrow(all.peaks)) {
     d <- data.frame(p.res, overlap.genes=paste(ov.genes, collapse = "|"), nearby.genes=paste(nearby.genes, collapse = "|"), ov.roi)
 
   } else {
+    print (pk)
     d <- data.frame(p.res, overlap.genes=paste(ov.genes, collapse = "|"), nearby.genes=paste(nearby.genes, collapse = "|"))
   }
 
   annot.peaks <- rbind(annot.peaks, d)
   
-} ### end of chromosomes 
+} ### end of peaks
 
 ### set column names 
 if (is.roi.avail) {
   colnames(annot.peaks) <- c('Peak.name','Chr','Start','End','Number.SV.samples','Percentage.SV.samples','SV.sample','Percentage.SV.types',
-                             'Peak.density','Dominant.svtype','Overlapped.genes','Nearby.genes',paste0('Overlapped.',gsub(".name", "", roi.name.cols)))
+                             'Dominant.svtype','Overlapped.genes','Nearby.genes',paste0('Overlapped.',gsub(".name", "", roi.name.cols)))
 } else {
   colnames(annot.peaks) <- c('Peak.name','Chr','Start','End','Number.SV.samples','Percentage.SV.samples','SV.sample','Percentage.SV.types',
-                             'Peak.density','Dominant.svtype','Overlapped.genes','Nearby.genes')
+                             'Dominant.svtype','Overlapped.genes','Nearby.genes')
 }
 
 ### write final results 

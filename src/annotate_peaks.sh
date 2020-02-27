@@ -11,6 +11,7 @@ region_of_interest=$2
 output_dir=$3
 num_nearby_genes=$4
 
+
 ################# Annotate grouped peaks by overlapping with genes flanked up/downstream by 2kb
 #combine all peak groups
 cat $output_dir/peaks/*.peak.group.bed | awk '{if($0 !~"pct.samples" && $1 !="") { print $0}}' > $output_dir/peaks/all_peaks.bed    
@@ -49,7 +50,9 @@ rm $output_dir/processed_data/all_peaks_with_strands.bed
 ### extract the region of interest files 
 IFS=',' read -r -a roi <<< "$region_of_interest"
 
-if [ "${#roi[@]}" != "0" ]; then
+#if [ "${#roi[@]}" != "0" ] && [ "$roi" != "0" ]; then
+ if [ "$region_of_interest" != "0" ]; then
+ 
    rm -rf $output_dir/processed_data/ROIs; mkdir $output_dir/processed_data/ROIs
    for item in "${roi[@]}"
    do

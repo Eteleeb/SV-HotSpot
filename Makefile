@@ -24,6 +24,14 @@ svhotspot: $(CONDA)
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) bedtools
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'r-base>=3.1.0'
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-ggplot2
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-peakPick
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-reshape2 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-gridExtra 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-plyr 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-gtable 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-ggsignif 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-RCircos
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-data.table
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-build
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-verify
 	git clone $(SV_HOTSPOT_URL) $(SV_HOTSPOT_LOCAL)

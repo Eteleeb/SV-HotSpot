@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# SV-HSD: strucutral varaint tool for detecting host spots 
+# SV-HotSpot: strucutral varaint tool for detecting host spots 
 # Created by Abdallah Eteleb <eteleeb@gmail.com> and Ha Dang Ha X. Dang <haxdang@gmail.com> 
 #
 # Version 1.0.0  6/30/2018
@@ -25,7 +25,7 @@ my $sv_file=0;
 my $genome='hg38';
 my $sliding_w_size = 100000;
 my $sliding_w_step = 1000; 
-my $output_dir = '/data';
+my $output_dir = '.';
 my $annot_file=0;
 my $peakPick_win=100;
 my $peakPick_minsd=5;
@@ -550,7 +550,7 @@ sub usage
    print("\t--chip-cov\t\t\tchip-seq coverage\t<filename>\t[ chip-seq coverage file in \"BED\" foramt ]\n");
    print("\t--chip-cov-lbl\t\t\tchip-seq coverage label\t<string>\t[ label used for chip-seq coverage ]\n");
    #print("\t--roi-lbl\t\t\tregion of int. label(s)\t<string>\t[ labels used for region(s) of interest separated by comma  ]\n");
-   print("\t--plot-top-peaks\t\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
+   print("\t--plot-top-peaks\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
    print("\t--left-ext\t\t\tsize of left extension\t<int>\t\t[ size of the left extension of the peak. default: 0bp ]\n");
    print("\t--right-ext\t\t\tsize of right extension\t<int>\t\t[ size of the right extension of the peak. default: 0bp ]\n");
 

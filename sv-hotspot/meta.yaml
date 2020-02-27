@@ -25,6 +25,14 @@ requirements:
     - bedtools ==2.29.1
     - r-base >=3.1.0
     - r-ggplot2
+    - r-peakPick
+    - r-reshape2
+    - r-gridExtra
+    - r-plyr
+    - r-gtable 
+    - r-ggsignif 
+    - r-RCircos
+    - r-data.table
 
   run:
     - perl >=5.10
@@ -32,6 +40,14 @@ requirements:
     - bedtools ==2.29.1
     - r-base >=3.1.0
     - r-ggplot2
+    - r-peakPick
+    - r-reshape2 
+    - r-gridExtra 
+    - r-plyr 
+    - r-gtable 
+    - r-ggsignif 
+    - r-RCircos
+    - r-data.table
 
 test:
     commands:

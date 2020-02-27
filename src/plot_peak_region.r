@@ -388,7 +388,7 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
      p0 = ggplot(win.data, aes(x=pos,y=num.samples, fill=cn.call)) + geom_bar(stat="identity")
      p0 = p0 + scale_fill_manual(name="", values=c("amp"="#b53f4d", "del"="#2c7fb8"), labels=c("amp"="Gain", "del"="Loss"), drop=FALSE,
                                  guide = guide_legend(override.aes = list(size = 7)))
-     p0 = p0 + theme_bw() + xlab('') + ylab('Copy number\nfrequency') + ggtitle(title)
+     p0 = p0 + theme_bw() + xlab('') + ylab('Copy number\nalterations frequency') + ggtitle(title)
      p0 = p0 + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
                      plot.title=element_text(size=16, hjust=0.5, face="bold"), axis.ticks = element_blank(),
                      axis.text.x=element_blank(), axis.text.y=element_text(size=14, color="black"),
