@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# SV-HotSpot: strucutral varaint tool for detecting host spots 
+# SV-HSD: strucutral varaint tool for detecting host spots 
 # Created by Abdallah Eteleb <eteleeb@gmail.com> and Ha Dang Ha X. Dang <haxdang@gmail.com> 
 #
 # Version 1.0.0  6/30/2018
@@ -25,7 +25,7 @@ my $sv_file=0;
 my $genome='hg38';
 my $sliding_w_size = 100000;
 my $sliding_w_step = 1000; 
-my $output_dir = '.';
+my $output_dir = './';
 my $annot_file=0;
 my $peakPick_win=100;
 my $peakPick_minsd=5;
