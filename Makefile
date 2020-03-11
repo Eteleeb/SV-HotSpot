@@ -24,10 +24,17 @@ svhotspot: $(CONDA)
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) bedtools
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'r-base>=3.1.0'
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-ggplot2
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-peakPick
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-reshape2 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-gridExtra 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-plyr 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-gtable 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-ggsignif 
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-RCircos
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-data.table
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-build
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) conda-verify
 	git clone $(SV_HOTSPOT_URL) $(SV_HOTSPOT_LOCAL)
-	cd $(SV_HOTSPOT_LOCAL) && git checkout -b docker-conda origin/docker-conda
 	cd $(SV_HOTSPOT_LOCAL) && $(CONDA) build sv-hotspot
 	cd $(SV_HOTSPOT_LOCAL) && cp $(CONDA_BUILD_PATH)/sv-hotspot-*.tar.bz2 ..
 #	source $(CONDA_PROFILE) && $(CONDA) activate $(SVHOTSPOT_ENV)
@@ -79,7 +86,7 @@ update-conda-channel::
 	git add channel
 	git commit -m "updated conda package $$(date)"
 	git push origin conda-channel
-	git checkout -B docker-conda origin/docker-conda
+	git checkout master
 
 create-conda-channel:
 	git checkout --orphan conda-channel
@@ -95,7 +102,7 @@ create-conda-channel:
 	git push origin conda-channel:conda-channel
 	git branch --set-upstream-to origin/conda-channel
 	git push origin conda-channel
-	git checkout -B docker-conda origin/docker-conda
+	git checkout master
 
 clean:
 	if [ -d $(SV_HOTSPOT_LOCAL) ]; then rm -rfv $(SV_HOTSPOT_LOCAL); fi

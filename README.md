@@ -10,7 +10,7 @@ This package is available as conda package.  To install it via `conda`, try the 
 conda create --yes --prefix /path/to/conda/environment
 conda activate /path/to/conda/environment
 
-# install svtools via conda
+# install sv-hotspot via conda
 conda install --yes \
     --channel bioconda \
     --channel conda-forge \
