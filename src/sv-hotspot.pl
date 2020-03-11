@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # SV-HSD: strucutral varaint tool for detecting host spots 
 # Created by Abdallah Eteleb <eteleeb@gmail.com> and Ha Dang Ha X. Dang <haxdang@gmail.com> 
@@ -45,8 +45,8 @@ my $plot_top_peaks=10;
 my $num_nearby_genes=1;
 my $t_stat="wilcox.test"; 
 my $chip_cov=0;
-my $chip_cov_lbl='chip-seq\ncov.';
-my $roi_lbl = '0';
+my $chip_cov_lbl='chip-seq-ncov.';
+my $roi_lbl = 0;
 my $left_ext = 0;
 my $right_ext = 0;
 
@@ -208,7 +208,7 @@ sub verify_input
    print "--------------------------------------------------\n";
    
    ##### check the header of the SV file 
-   print " Checking structural variants file format...";
+   print "Checking structural variants file format...";
    #open my $sv_f, '<', $sv_file;
    open(my $sv_f, '<', $sv_file) or die $!;
 
@@ -243,7 +243,7 @@ sub verify_input
 
    ##### check the header of annotation file
    if ($annot_file) { 
-        print " Checking annotation file format...";
+        print "Checking annotation file format...";
 	open my $annot, '<', $annot_file;
 	my $annot_header = <$annot>;
         
@@ -257,7 +257,7 @@ sub verify_input
 
    ##### check the header of region of interes file
    if ($region_of_int) { 
-   print " Checking region of interest file(s) format...";
+   print "Checking region of interest file(s) format...";
       my @roi_files = split(",", $region_of_int);
       foreach (@roi_files) {
           open my $roi, '<', $_;
@@ -273,7 +273,7 @@ sub verify_input
 
    ##### check the header of chip coverage file
    if ($chip_cov) { 
-        print " Checking ChIP-Seq coverage file format...";
+        print "Checking ChIP-Seq coverage file format...";
 	open my $chipCov, '<', $chip_cov;
 	my $chipCov_header = <$chipCov>;
 	if ($chipCov_header !~ /\bchrom\b/ || $chipCov_header !~ /\bstart\b/ || $chipCov_header !~ /\bend\b/ || $chipCov_header !~ /\bcov\b/) {
@@ -296,7 +296,7 @@ sub verify_input
 
    ##### check the header of copy number file 
    if ($cn_file) { 
-   print " Checking copy number file format...";
+   print "Checking copy number file format...";
 	open my $cn, '<', $cn_file;
 	my $cn_header = <$cn>;
 	if ($cn_header !~ /\bchrom\b/ || $cn_header !~ /\bstart\b/ || $cn_header !~ /\bend\b/ || $cn_header !~ /\bsample\b/ || $cn_header !~ /\bcn\b/) {
@@ -310,7 +310,7 @@ sub verify_input
    
    #### check if feature name in annotation match the one in the expression 
    if ($annot_file && $expr_file) {
-      print " Checking if feature name in the expression matches the one in the annotation file...";
+      print "Checking if feature name in the expression matches the one in the annotation file...";
       open( my $annot, '<', $annot_file) or die "Can't open file: $!";
       open( my $exp, '<', $expr_file) or die "Can't open file: $!";
       my $annot_header = <$annot>; 
@@ -333,7 +333,7 @@ sub verify_input
 
    #### check if the expression file has no duplicated rows 
    if ($expr_file) {
-      print " Checking if the expression file has no duplicated rows...";
+      print "Checking if the expression file has no duplicated rows...";
       open( my $exp, '<', $expr_file) or die "Can't open file: $!";
       my @genes; 
       my %count;
@@ -404,14 +404,14 @@ sub identify_peaks
    print "\n--------------------------------------------------\n";
    print "STEP 1: Identifying Peaks (hotspot regions) \n";
    print "--------------------------------------------------\n";
-   print "\nSegmenting the genome into sliding windows\n";
+   print "Segmenting the genome into sliding windows\n";
    system ("Rscript genome-to-sliding-window.r $chromsize_file $sliding_w_size $sliding_w_step $output_dir $chrom");
 
    print "Overlapping breakpoints with sliding windows\n";
    system ("intersectBed -wao -a $output_dir/processed_data/genome.segments.bed -b $output_dir/processed_data/all_bp.bed > $output_dir/processed_data/genome.segments.with.bps.bed");
    
    ### split the result by chromosme 
-   print "\nSplitting the overlapped file by chromosome\n";
+   print "Splitting the overlapped file by chromosome\n";
    system ("rm -rf $output_dir/processed_data/segments_with_bps_per_chr; mkdir $output_dir/processed_data/segments_with_bps_per_chr");
    system("awk '{print \$0 >> \"$output_dir/processed_data/segments_with_bps_per_chr/\"\$1\".bed\"}' $output_dir/processed_data/genome.segments.with.bps.bed");
 
@@ -453,8 +453,8 @@ sub annotate_peaks
    print "--------------------------------------------------\n";
   
    system("annotate_peaks.sh $genome $region_of_int $output_dir $num_nearby_genes"); 
-   print ("Summarizing annotated peaks ...\n");
-   system ("Rscript summarize_peaks_results.r $output_dir $region_of_int $roi_lbl"); 
+   print ("Summarizing annotated peaks...");
+   system ("Rscript summarize_peaks_results.r $output_dir $region_of_int $roi_lbl $expr_file"); 
 }
 
 
@@ -471,7 +471,7 @@ sub determine_association
      system ("Rscript determine_gene_association.r $output_dir $expr_file $cn_file $t_amp $t_del $pvalue $t_stat $genes_of_int $genome");
    } else {
      print "To determine the association between SVs and gene expression, both expression and copy number data are required. \n";
-   exit(0); 
+     return(); 
    }
 
 }
@@ -485,27 +485,17 @@ sub visualize_res
    print "\n--------------------------------------------------\n";
    print "STEP 4: Visualizing hotspot regions \n";
    print "--------------------------------------------------\n";
-
-   ### check if chip-cov data was provided 
-   #if ($chip_cov) { 
-   #  if ($max < 1000) { 
-   #   print "\nWarning:\n  it seems the chip coverage file was not averaged using a window approach suggested in the documentation. Visualizing hotspots with the raw chip covergae data results in a very long running time.". 
-   #         "\n  It is recommended you average chip coverage data using at least 10K window. We have provided a script \"process_chip_cov.r\" for this process. You may consider using it.". 
-   #         "\n  For more information, please refer to the documentation page on https://github.com/ChrisMaherLab/SV-Hotspot\n\n";
-   #   exit(0);  
-   #  } 
-   #}
-
-   if ($expr_file && $cn_file) {
-      ### extract top peaks 
-      my $pks = `cut -f1 $output_dir/annotated_peaks_summary.tsv | grep -v "Peak.name" | head -$plot_top_peaks |  paste -sd, -`;
-      chomp($pks);
-      #system ("plot_peaks.r $sv_file $output_dir $expr_file $cn_file $chip_cov $t_amp $t_del $chip_cov_lbl $roi_lbl $plot_top_peaks $left_ext $rigth_ext");
-
+   
+   ### extract top peaks 
+   my $pks = `cut -f1 $output_dir/annotated_peaks_summary.tsv | grep -v "Peak.name" | head -$plot_top_peaks |  paste -sd, -`;
+   chomp($pks);
+   
+   if ($expr_file & $cn_file) {
       system ("Rscript plot_peak_region.r $pks $output_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
-   } else {
-      print "Expression and copy number data are required to visualize hotspot reagions.\n";
-      exit(0);
+   } elsif (!$expr_file) {
+      system ("Rscript plot_peak_region_with_no_exp.r $pks $output_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
+   } elsif (!$cn_file) {
+      system ("Rscript plot_peak_region_with_no_cn.r $pks $output_dir $sv_file $output_dir $expr_file $region_of_int $chip_cov $chip_cov_lbl $left_ext $right_ext ");
    }
 
 }
@@ -550,7 +540,7 @@ sub usage
    print("\t--chip-cov\t\t\tchip-seq coverage\t<filename>\t[ chip-seq coverage file in \"BED\" foramt ]\n");
    print("\t--chip-cov-lbl\t\t\tchip-seq coverage label\t<string>\t[ label used for chip-seq coverage ]\n");
    #print("\t--roi-lbl\t\t\tregion of int. label(s)\t<string>\t[ labels used for region(s) of interest separated by comma  ]\n");
-   print("\t--plot-top-peaks\t\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
+   print("\t--plot-top-peaks\t\tplot top # peaks\t<int>\t\t[ number of top peaks to plot. default: top 10 ]\n");
    print("\t--left-ext\t\t\tsize of left extension\t<int>\t\t[ size of the left extension of the peak. default: 0bp ]\n");
    print("\t--right-ext\t\t\tsize of right extension\t<int>\t\t[ size of the right extension of the peak. default: 0bp ]\n");
 

@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 args = commandArgs(T)
 
@@ -117,7 +117,7 @@ groupPeaks <- function(x, d){
     }
 
     num.peak.groups = length(unique(x$group[!is.na(x$group)]))
-    cat('Number of peak groups: ', num.peak.groups, '\n')
+    cat('Number of peaks: ', num.peak.groups, '\n')
     
     ## keep max peaks 
     #x = as.data.table(x[!is.na(x$group), ])
@@ -163,8 +163,8 @@ custom.tracks <- function(x){
 
 ###### call peaks for each chr for chosen svtype and plot results
 out.dir <- paste0(out.dir,'/peaks')
-dir.create(out.dir)
-dir.create(paste0(out.dir,'/ucsc_custom_track_files'))
+dir.create(out.dir, showWarnings = FALSE)
+dir.create(paste0(out.dir,'/ucsc_custom_track_files'), showWarnings = FALSE )
 
 for (chr in chrs){
     cat(chr, '\n')

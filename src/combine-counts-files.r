@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Combine counts files 
 # Created by: Abdallah Eteleeb <eteleeb@gmail.com>

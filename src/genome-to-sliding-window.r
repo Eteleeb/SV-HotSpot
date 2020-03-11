@@ -1,4 +1,4 @@
-#!/usr/local/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Read chr sizes and generate sliding windows in bed format
 # Created by: Ha X. Dang <haxdang attt gmail dottt com>

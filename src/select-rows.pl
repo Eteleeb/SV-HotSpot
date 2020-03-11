@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # Created by HD <hd@vt.edu> Jul. 2011
 # Last updated: Dec. 2014, v2: allow specifying ID column

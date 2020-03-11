@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # Plot peak: this scripr is used to plot a structural varaint peak  
 # Created by Abdallah Eteleb <eteleeb@gmail.com> and Ha Dang Ha X. Dang <haxdang@gmail.com> 
@@ -17,19 +17,20 @@ use File::Basename;
 #define input options with default values 
 my $peak="";
 my $res_dir="";
-my $sv_file='0';
+my $sv_file=0;
 my $output_dir = '/data';
-my $expr_file='0'; 
-my $cn_file='0';
+my $expr_file=0; 
+my $cn_file=0;
 my $t_amp=2.8;
 my $t_del= 0.5;
-my $region_of_int='0'; 
-my $chip_cov='0';
-my $chip_cov_lbl="";
-my $roi_lbl ="";
+my $region_of_int=0; 
+my $chip_cov=0;
+#my $chip_cov_lbl="";
+my $chip_cov_lbl='chip-seq\ncov.';
+#my $roi_lbl ="";
 my $left_ext = 0;
 my $right_ext = 0;
-my $use_dom = '0';
+#my $use_dom = '0';
 
 GetOptions
 (
@@ -44,13 +45,13 @@ GetOptions
     'r|region-of-int=s' =>\$region_of_int,
     'chip-cov=s' =>\$chip_cov,
     'chip-cov-lbl=s' => \$chip_cov_lbl,
-    'roi-lbl=s' => \$roi_lbl,
+    #'roi-lbl=s' => \$roi_lbl,
     'left-ext=i' => \$left_ext,
-    'right-ext=i' => \$right_ext,
-    'use-dom=s' => \$use_dom
+    'right-ext=i' => \$right_ext
+    #'use-dom=s' => \$use_dom
 );
 
-usage() if (!$peak | !$sv_file | !$res_dir | !$expr_file | !$cn_file );
+#usage() if (!$peak | !$sv_file | !$res_dir);
 
 print "\n---------------------------------------------\n";
 print "            Plotting Peak: $peak\n";
@@ -67,23 +68,11 @@ print "---------------------------------------------\n";
 #   } 
 #}
 
-if ($expr_file && $cn_file) {
-   # check if the user provided chip-seq data, if yes run the script to prcess it (average over a windwo)
-   #if ($chip_cov) {
-   #   print "Processing chip-seq data, please wait as this may take several minutes\n";
-   #   system("process_chip_data.r $chip_cov $output_dir");
-   #} 
-    if (!$use_dom) {
-      system ("plot_peak_region.r $peak $res_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $roi_lbl $left_ext $right_ext");
-    } else {
-      system ("plot_peak_region_using_dom.r $peak $res_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $roi_lbl $left_ext $right_ext");
-    }
-   
-} else {
-  print "Both expression and copy number data are required to generate visualization\n";
-  exit(0);
+if ($expr_file & $cn_file) { 
+   system ("Rscript plot_peak_region.r $peak $res_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
+} elsif (!$expr_file) {
+   system ("Rscript plot_peak_region_with_no_exp.r $peak $res_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
 }
-
 
 my $output_folder = $output_dir;
 $output_folder =~ s/\/data\///;

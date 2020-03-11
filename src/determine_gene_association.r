@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Find regions/peaks whose SVs altered expression of the downstream genes
 # Written by Abdallah Eteleeb <eteleeb@gmail.com> 
@@ -29,7 +29,7 @@ s_test = eval(parse(text = stat_test))
 ############################ Function to select the top peaks for each gene ##############################
 pickTopPeaks <- function (peaks, genes, total_samples) {
   ### extract all genes 
-  assoc.genes <- unique(genes$Gene)
+  assoc.genes <- as.character(unique(genes$Gene))
   
   ### function to extract the top peak 
   selectTopPeak <- function (pks) {
@@ -38,6 +38,9 @@ pickTopPeaks <- function (peaks, genes, total_samples) {
     if (length(top.peak2) > 1) {
       top.peak$len <- top.peak$End - top.peak$Start
       top.peak2 <- top.peak[top.peak$len == min(top.peak$len), 'Peak.name']
+      if (length(top.peak2) > 1) {
+        top.peak2 <- sample(top.peak$Peak.name, size = 1)
+      }
     }
     return (top.peak2)
   }
@@ -46,7 +49,7 @@ pickTopPeaks <- function (peaks, genes, total_samples) {
   for (i in 1:length(assoc.genes)) {
     g <- assoc.genes[i]
     ### extract peaks assoicated with the gene 
-    gene.peaks <- unique(genes[genes$Gene==g, 'Peak.name']) 
+    gene.peaks <- as.character(unique(genes[genes$Gene==g, 'Peak.name'])) 
     if (length(gene.peaks) == 1) {
       dd <- data.frame(Gene=g, Peak.name = gene.peaks)
       filtered.res <- rbind(filtered.res, dd)
@@ -174,13 +177,14 @@ cat('done.\n')
 cat('Examining all peaks...')
 #Initiate the bar
 #pb <- txtProgressBar(min = 0, max = nrow(res), style = 3)
-
 final.res <- NULL
 all.genes.res <- NULL
 for (i in 1:nrow(res)){
   pk <- res$Peak.name[i]
   pk.locus = paste0(res$Chr[i],":",res$Start[i],"-",res$End[i])
-
+  pk.num.samples <- res$Number.SV.samples[i]
+  pk.perc.samples <- res$Percentage.SV.samples[i]
+  
   genes.in.peak <- c(unlist(strsplit(res$Overlapped.genes[i],  "\\|")), unlist(strsplit(res$Nearby.genes[i],  "\\|")))
   ### remove genes wuthout expression data 
   genes.in.peak <- genes.in.peak[genes.in.peak %in% exp[,1]]
@@ -349,7 +353,8 @@ for (i in 1:nrow(res)){
     colnames(pvals.res) = cols 
     pvals.res = pvals.res[-1,]
 
-    d <- data.frame(Peak.name=pk, Peak.locus = pk.locus, gene=g, logFC=log.fc, min.pval=g.pval, pvals.res, SVs.vs.nonSVs.status=status, SVs_mean_exp, nonSVs_mean_exp)
+    d <- data.frame(gene=g, Peak.name=pk, Peak.locus = pk.locus, Number.SV.samples = pk.num.samples, Percentage.SV.samples = pk.perc.samples,  
+                    logFC=log.fc, min.pval=g.pval, pvals.res, SVs.vs.nonSVs.status=status, SVs_mean_exp, nonSVs_mean_exp)
     all.genes.res <- rbind(all.genes.res, d)  ### for statistical information about genes 
     
   }  ### end of genes in the current peak 
@@ -375,11 +380,13 @@ if (nrow(sig.genes) > 0 ) {
 
    #### write resutls for genes assoicated with SV peaks 
    pval.cols = colnames(sig.genes)[grepl(".vs.", colnames(sig.genes)) & colnames(sig.genes) !="SVs.vs.nonSVs.status"]
-   colnames(sig.genes) = c("Peak.name", "Peak.locus", "Gene", "LogFC","Min.pval",paste0(pval.cols,".pval"),"SVs.vs.nonSVs.status", "SVs.mean.exp","nonSVs.mean.exp")
+   colnames(sig.genes) = c("Gene", "Peak.name", "Peak.locus", "Number.SV.samples","Percentage.SV.samples", 
+                           "LogFC","Min.pval",paste0(pval.cols,".pval"),"SVs.vs.nonSVs.status", "SVs.mean.exp","nonSVs.mean.exp")
    
    #### filter results by selecting the top peaks based on the significance of overlap 
    pickTopPeaks(final.res, sig.genes, length(samples.with.sv))
    #write.table(sig.genes, file=paste0(out.dir, '/genes.associated.with.SVs.tsv'), sep="\t", quote=F, row.names=F)
+   
 } else {
    cat(paste("No associated genes were detected using p-value cutoff of", pval, "\n"))   
 }
@@ -389,7 +396,7 @@ cat(length(final.res$Peak.name), 'hotspots (peaks) were identified for this anal
 cat(length(unique(sig.genes$Gene)), 'genes were detected to be associated with identified hotspots.\n')
 
 
-##### plot circos plot ####
+############### plot circos plot ############
 built.in.genomes = c('hg18', 'hg19', 'hg38', 'mm9', 'mm10', 'dm3', 'dm6', 'rn4', 'rn5','rn6')
 if (genome %in% built.in.genomes) {
   cat('Generating circos plot for identified peaks...')
@@ -413,7 +420,7 @@ if (genome %in% built.in.genomes) {
       cyto.info <- read.table(file.path, colClasses = c("character", "numeric", "numeric", "character", "character"), sep = "\t", stringsAsFactors = FALSE)  
       colnames(cyto.info) = c('Chromosome','chromStart','chromEnd','Name','Stain')
     } else {
-      stop(paste0("SV-Hotspot cannot generate Circos plot for identified peaks because cytoband information file was found for genome ", genome,"!.\n"))
+      warning(paste0("Circos plot cannot be generated for identified peaks because cytoband information is not available for genome ", genome,".\n"))
     }
     
   }
@@ -439,7 +446,7 @@ if (genome %in% built.in.genomes) {
   rcircos.params$text.size = 0.5
   rcircos.params$track.height <- 0.25
   RCircos.Reset.Plot.Parameters(rcircos.params)
-  RCircos.List.Plot.Parameters()
+  #RCircos.List.Plot.Parameters()
   
   #### initialize the graphic device 
   pdf(paste0(out.dir,"/Circos_plot_of_all_peaks.pdf"),  height=8, width=8)

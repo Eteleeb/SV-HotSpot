@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Find regions/peaks whose SVs altered expression of nearby genes
 # Written by Abdallah Eteleeb & Ha Dang
@@ -351,7 +351,7 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
    x2[x2$svtype == "DEL", "num.samples"] <-  x2[x2$svtype == "DEL", "num.samples"] * -1
 
    ### make the title 
-   title = paste0('Associated Gene: ',gene,' (Peak locus: ',pk.corr$Chr, ':',  pk.corr$Start, '-',  pk.corr$End,')')
+   #title = paste0('Associated Gene: ',gene,' (Peak locus: ',pk.corr$Chr, ':',  pk.corr$Start, '-',  pk.corr$End,')')
 
    ### compute the DUP and DEL pileup of SV
    dup_del = pileUp(sv, pk.corr$Chr, left, right)
@@ -361,42 +361,49 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
  
   ################################## plot region copy number ###############################################
   #if (is.cn.avail) {
+     reg.width = (right - left)+1
      reg.cn = cn_data[cn_data$chrom == pk.corr$Chr & (cn_data$pos > left | cn_data$pos < right),]
      reg.cn = reg.cn[tolower(reg.cn$cn.call) %in% c("amp", "del"), ]
-    
-     reg.width = (right - left)+1
-     s = round(reg.width/500)
-     imin = min(reg.cn$start)
-     imax = max(reg.cn$end)
-     chr.name=unique(reg.cn$chrom)
-     reg.win = data.frame(chr=chr.name, start=seq(imin,imax,s))
-     reg.win$stop = reg.win$start + s - 1
-     write.table(reg.cn, file=paste0(res.dir,'/processed_data/reg.cn.tsv'), quote=F, row.names=F, sep="\t", col.names=F)
-     write.table(reg.win, file=paste0(res.dir,'/processed_data/reg.win.tsv'), quote=F, row.names=F, sep="\t", col.names=F)
-
-     ### overlap windows with copy number 
-     #cat ("Overlapping windows with copy number ..")
-     system(paste0("intersectBed -wo -a ",res.dir,"/processed_data/reg.win.tsv -b ", res.dir,"/processed_data/reg.cn.tsv | cut -f2,3,7,9 | sort | uniq | sort -k1,1 -k2,2 | groupBy -full -g 1,2 -c 4 -o count > ", res.dir, "/processed_data/win_cn.tsv")) 
-
-     win.data = read.table(paste0(res.dir,"/processed_data/win_cn.tsv"), header = F, sep ="\t")
-     colnames(win.data) = c('start', 'stop','sample', 'cn.call', 'num.samples')
-     win.data$pos = (win.data$start + win.data$stop)/2
-     ### add dummy data for visualization purpuses 
-     win.data=rbind(win.data, data.frame(start=-1,stop=-2,sample="dummp1",cn.call="amp",num.samples=0, pos=-1))
-     win.data=rbind(win.data, data.frame(start=-1,stop=-2,sample="dummp1",cn.call="del",num.samples=0, pos=-1))
      
-     p0 = ggplot(win.data, aes(x=pos,y=num.samples, fill=cn.call)) + geom_bar(stat="identity")
-     p0 = p0 + scale_fill_manual(name="", values=c("amp"="#b53f4d", "del"="#2c7fb8"), labels=c("amp"="Gain", "del"="Loss"), drop=FALSE,
-                                 guide = guide_legend(override.aes = list(size = 7)))
-     p0 = p0 + theme_bw() + xlab('') + ylab('Copy number\nfrequency') + ggtitle(title)
-     p0 = p0 + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
-                     plot.title=element_text(size=16, hjust=0.5, face="bold"), axis.ticks = element_blank(),
-                     axis.text.x=element_blank(), axis.text.y=element_text(size=14, color="black"),
-                     axis.title.x=element_blank(), axis.title.y=element_text(size=16, color="black"),
-                     legend.key.size = unit(1,"cm"), legend.text=element_text(size=14),
-                     panel.background=element_rect(color="black"))
-     p0 = p0 + scale_x_continuous(limits=c(left, right), expand=c(0.05,0.05))
-     p0 = p0 + geom_vline(xintercept=c(pk.corr$Start, pk.corr$End), color='black', linetype='dashed')
+     if (nrow(reg.cn) !=0) { 
+       
+       s = round(reg.width/500)
+       imin = min(reg.cn$start)
+       imax = max(reg.cn$end)
+       chr.name=unique(reg.cn$chrom)
+       reg.win = data.frame(chr=chr.name, start=seq(imin,imax,s))
+       reg.win$stop = reg.win$start + s - 1
+       write.table(reg.cn, file=paste0(res.dir,'/processed_data/reg.cn.tsv'), quote=F, row.names=F, sep="\t", col.names=F)
+       write.table(reg.win, file=paste0(res.dir,'/processed_data/reg.win.tsv'), quote=F, row.names=F, sep="\t", col.names=F)
+       
+       ### overlap windows with copy number 
+       #cat ("Overlapping windows with copy number ..")
+       system(paste0("intersectBed -wo -a ",res.dir,"/processed_data/reg.win.tsv -b ", res.dir,"/processed_data/reg.cn.tsv | cut -f2,3,7,9 | sort | uniq | sort -k1,1 -k2,2 | groupBy -full -g 1,2 -c 4 -o count > ", res.dir, "/processed_data/win_cn.tsv")) 
+       
+       win.data = read.table(paste0(res.dir,"/processed_data/win_cn.tsv"), header = F, sep ="\t")
+       colnames(win.data) = c('start', 'stop','sample', 'cn.call', 'num.samples')
+       win.data$pos = (win.data$start + win.data$stop)/2
+       ### add dummy data for visualization purpuses 
+       win.data=rbind(win.data, data.frame(start=-1,stop=-2,sample="dummp1",cn.call="amp",num.samples=0, pos=-1))
+       win.data=rbind(win.data, data.frame(start=-1,stop=-2,sample="dummp1",cn.call="del",num.samples=0, pos=-1))
+       
+       p0 = ggplot(win.data, aes(x=pos,y=num.samples, fill=cn.call)) + geom_bar(stat="identity")
+       p0 = p0 + scale_fill_manual(name="", values=c("amp"="#b53f4d", "del"="#2c7fb8"), labels=c("amp"="Gain", "del"="Loss"), drop=FALSE,
+                                   guide = guide_legend(override.aes = list(size = 7)))
+       p0 = p0 + theme_bw() + xlab('') + ylab('Copy number\nalteration frequency')
+       p0 = p0 + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+                       plot.title=element_text(size=16, hjust=0.5, face="bold"), axis.ticks = element_blank(),
+                       axis.text.x=element_blank(), axis.text.y=element_text(size=14, color="black"),
+                       axis.title.x=element_blank(), axis.title.y=element_text(size=16, color="black"),
+                       legend.key.size = unit(1,"cm"), legend.text=element_text(size=14),
+                       panel.background=element_rect(color="black"))
+       p0 = p0 + scale_x_continuous(limits=c(left, right), expand=c(0.05,0.05))
+       p0 = p0 + geom_vline(xintercept=c(pk.corr$Start, pk.corr$End), color='black', linetype='dashed')
+       
+     } else {
+        p0 <- NULL
+      }    
+    
   #}
 
   ################################## Plot DUP $ DEL Freq ####################################
@@ -458,7 +465,9 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
 
   ######################################## plot chip-seq data ###########################################
   if (is.chip.avail) {
-     reg.chip = chip_seq[chip_seq$chrom == pk.corr$Chr & chip_seq$pos > left | chip_seq$pos < right,]
+     reg.chip = chip_seq[chip_seq$chrom == pk.corr$Chr & 
+                         chip_seq$pos >= left & 
+                         chip_seq$pos <= right,]
 
      p3 = ggplot (reg.chip,aes(x=pos, y=cov)) + geom_bar(stat="identity", width = D/300)
      p3 = p3 + theme_bw() + xlab('') + ylab(chip.cov.lbl)
@@ -565,6 +574,7 @@ if (file.exists((cn.file))) {
 } else {
   stop(paste0('Copy number file \"', cn.file, '\" was not found!'))
 }
+#cat('done.\n')
 
 ### read peaks with copy number data
 if (file.exists(paste0(res.dir,'/processed_data/peaks_with_cn.bed'))) {
@@ -574,6 +584,7 @@ if (file.exists(paste0(res.dir,'/processed_data/peaks_with_cn.bed'))) {
 } else {
   stop (paste0("Peaks copy number file \"", res.dir, "/processed_data/peaks_with_cn.bed\" was not found!.\n"))
 }
+#cat('done.\n')
 
 ### read genes with copy number data
 if (file.exists(paste0(res.dir,'/processed_data/genes_with_cn.bed'))) {
@@ -628,7 +639,7 @@ if (file.exists((exp.file))) {
 }
 cat('done.\n')
 
-### extract samples without SVs
+### extract samples that have expression but do have SVs
 samples.with.no.SVs <- unique(colnames(exp)[!exp.data.cols %in% samples.with.sv])
 
 #### read region of interest file(s) 
@@ -662,6 +673,15 @@ if(!dir.exists(paste0(out.dir, '/peaks-plots'))){ dir.create(paste0(out.dir, '/p
 ### extract peaks
 pks.to.plot = unlist(strsplit(pks.to.plot,  ","))
 
+### check if the availability of peaks  
+if (!any(pks.to.plot %in% res$Peak.name)) {
+  stop('None of the peaks were found the in the results file.\n') 
+}
+cat('Peaks to plot:', pks.to.plot[pks.to.plot %in% res$Peak.name],'\n')
+if (length(pks.to.plot[!pks.to.plot %in% res$Peak.name]) !=0) {
+  cat('Peaks not found in the results file:', pks.to.plot[!pks.to.plot %in% res$Peak.name], '\n')
+}
+
 for (k in 1:length(pks.to.plot)) {
   pk = pks.to.plot[k]
   cat('\n','Plotting peak', pk, '\n')
@@ -680,12 +700,17 @@ for (k in 1:length(pks.to.plot)) {
 
   ### extract peak data
   pp = pks[pks$p.name==pk & pks$sample %in% samples.with.sv, ]
-  pp.cn = pks.cn[pks.cn$p.name==pk & pks.cn$sample %in% samples.with.sv, ]
+  pp.cn = pks.cn[pks.cn$p.name==pk & pks.cn$sample %in% samples.with.sv, c('p.name','sample', 'cn.value', 'cn.call')]
 
   #### include samples with no SVs as neutral samples 
   if (length(samples.with.no.SVs) > 0) {
     pp.cn = rbind(pp.cn, data.frame(p.name=pk, sample=samples.with.no.SVs, cn.value=0, cn.call="neut"))
   }
+  
+  ### extract peak copy number samples
+  pk.neut.samples <- unique(pp.cn[pp.cn$cn.call=="neut",'sample'])
+  pk.amp.samples <-  unique(pp.cn[pp.cn$cn.call=="amp",'sample'])
+  pk.del.samples <-  unique(pp.cn[pp.cn$cn.call=="del",'sample'])
   
   ### extract sv/other samples 
   sv.pats <- unique(pp$sample)
@@ -728,11 +753,6 @@ for (k in 1:length(pks.to.plot)) {
     g.amp.samples <- unique(genes.cn[genes.cn$gene==g & genes.cn$cn.call =="amp",'sample'])
     g.del.samples <- unique(genes.cn[genes.cn$gene==g & genes.cn$cn.call =="del",'sample'])
     
-    ### extract peak copy number samples
-    pk.neut.samples <- unique(pp.cn[pp.cn$cn.call=="neut",'sample'])
-    pk.amp.samples <-  unique(pp.cn[pp.cn$cn.call=="amp",'sample'])
-    pk.del.samples <-  unique(pp.cn[pp.cn$cn.call=="del",'sample'])
-    
     ### extract expression 
     g.exp <- as.data.frame(t(exp[exp[,1]==g, exp.data.cols]))
     g.exp$sample <- rownames(g.exp)
@@ -743,10 +763,6 @@ for (k in 1:length(pks.to.plot)) {
     #### a dd sample status column
     g.exp$sample.status <- 'non-SVs'
     g.exp[g.exp$sample %in% sv.pats, 'sample.status'] <- 'SVs'
-    
-    #### add tandem duplication status 
-    #g.exp$td.status <- 'non-TD'
-    #g.exp[g.exp$sample %in% DUP.pats, 'td.status'] <- 'TD'
     
     #### add gene copy number status 
     g.exp$gene.cn.status <- "neut"
@@ -763,7 +779,7 @@ for (k in 1:length(pks.to.plot)) {
     #plot.exp.amp.del(g.exp, BND.pats,DUP.pats,INS.pats,DEL.pats,INV.pats, paste0(out.dir,'/peaks-plots/',g,'_',pk), g, pk)
     
     ############### run the function to plot the peak regin #################
-    p.reg = plot.region(pk, p.corr, g, genes.in.peak, roi.annot)
+    p.reg = suppressWarnings( plot.region(pk, p.corr, g, genes.in.peak, roi.annot) )
     n = length(p.reg) 
     
     p.reg[[length(p.reg)+1]] = plot.ex[["e1"]]
@@ -771,7 +787,7 @@ for (k in 1:length(pks.to.plot)) {
     p.reg[[length(p.reg)+1]] = plot.ex[["e3"]]
     
     ### align all plots 
-    all.plots <- do.call(AlignPlots, p.reg)
+    all.plots <- suppressWarnings( do.call(AlignPlots, p.reg) )
 
     ### set the layout matrix (version 1 with three columns)
     #mat = matrix(ncol=3, nrow=n+1)
@@ -795,8 +811,11 @@ for (k in 1:length(pks.to.plot)) {
     #mywidths = c(1.5, plot.ex[["w1"]], plot.ex[["w2"]])
     
     #### plot all 
-    pdf(paste0(out.dir,'/peaks-plots/',g,'_',pk,".pdf"), width=18, height=sum(myheights), title='', useDingbats=F, onefile=FALSE)
-    grid.arrange(grobs=all.plots, nrow=n,ncol=2, layout_matrix=mat, heights = myheights, widths=mywidths)
+    g.title = paste0('Peak locus: ',p.corr$Chr, ':',  p.corr$Start, '-',  p.corr$End)
+    mytitle=textGrob(g.title, gp=gpar(fontsize=20,fontface="bold"))
+    
+    pdf(paste0(out.dir,'/peaks-plots/',g,'_',pk,'.pdf'), width=18, height=sum(myheights), title='', useDingbats=F, onefile=FALSE)
+    grid.arrange(grobs=all.plots, nrow=n,ncol=2, layout_matrix=mat, heights = myheights, widths=mywidths, top = mytitle)
     dev.off()
     
   }  ### end of genes in the peak 

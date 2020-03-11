@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Summarize sample count per sliding window from bed overlap
 # Created by: Ha X. Dang <haxdang@gmail.com>
@@ -10,7 +10,7 @@ chr.file = args[1]
 out.dir = args[2]
 
 chr.name = gsub(".bed","", chr.file)
-cat (paste("\nSummarizing sample counts for chromosme",chr.name, "\n"))
+cat (paste("Summarizing sample counts for chromosome",chr.name, "\n"))
 
 #read window vs break point overlap 
 cat('Reading window data...\n')
@@ -33,11 +33,13 @@ total.samples <- length(unique(bp$sample))
 w = x[, c('chr', 'start', 'stop')]
 w = w[!duplicated(w),]
 rownames(w) = paste(w$chr, w$start, w$stop, sep='_')
-cat('Found total', nrow(w), 'unique windows\n')
+cat(nrow(w), 'unique windows were found\n')
 
 # count number of samples having at least one break point in each window
 countSamples <- function(x, svtype='ALL'){
-    cat('Counting samples for', svtype, ' structural variants ...')
+    #cat('Counting samples for "', svtype, '" structural variants... ')
+    cat('Counting samples for "', svtype, '" structural variants... ', sep="")
+
     if (svtype != 'ALL'){
         z = x[x$svtype == svtype,]
     }else{
