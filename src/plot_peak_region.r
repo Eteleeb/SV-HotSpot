@@ -365,7 +365,6 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
      reg.cn = cn_data[cn_data$chrom == pk.corr$Chr & (cn_data$pos > left | cn_data$pos < right),]
      reg.cn = reg.cn[tolower(reg.cn$cn.call) %in% c("amp", "del"), ]
      
-<<<<<<< HEAD
      if (nrow(reg.cn) !=0) { 
        
        s = round(reg.width/500)
@@ -405,7 +404,6 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
         p0 <- NULL
       }    
     
-=======
      p0 = ggplot(win.data, aes(x=pos,y=num.samples, fill=cn.call)) + geom_bar(stat="identity")
      p0 = p0 + scale_fill_manual(name="", values=c("amp"="#b53f4d", "del"="#2c7fb8"), labels=c("amp"="Gain", "del"="Loss"), drop=FALSE,
                                  guide = guide_legend(override.aes = list(size = 7)))
@@ -418,7 +416,7 @@ plot.region <- function(pk, pk.corr, gene, genes.in.p, p.roi, D=NULL){
                      panel.background=element_rect(color="black"))
      p0 = p0 + scale_x_continuous(limits=c(left, right), expand=c(0.05,0.05))
      p0 = p0 + geom_vline(xintercept=c(pk.corr$Start, pk.corr$End), color='black', linetype='dashed')
->>>>>>> 6c810995ce8f8da6a3f5ee2e2c35284073378c3f
+
   #}
 
   ################################## Plot DUP $ DEL Freq ####################################

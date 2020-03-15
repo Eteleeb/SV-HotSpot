@@ -388,7 +388,7 @@ sub prepare_SVs
    #system ("for type in `cut -f4 $output_dir/processed_data/all_bp.bed | cut -f2 -d'/' | sort | uniq`; do cat $output_dir/processed_data/all_bp.bed | grep \"\/\$type\" > $output_dir/processed_data/bp.\$type.bed; done");
 
    ### generate bedpe file for DEL and DUP events
-   system ("Rscript generate-bedpe-for-DEL-DUP.r $sv_file $output_dir");
+   system ("generate-bedpe-for-DEL-DUP.r $sv_file $output_dir");
    system ("cat $output_dir/processed_data/all_bp.bed $output_dir/processed_data/del_dup_sv.bed > $output_dir/processed_data/all_bp_tmp.bed; mv $output_dir/processed_data/all_bp_tmp.bed $output_dir/processed_data/all_bp.bed");
    
    ### remove del_dup_sv.bed 
@@ -405,7 +405,7 @@ sub identify_peaks
    print "STEP 1: Identifying Peaks (hotspot regions) \n";
    print "--------------------------------------------------\n";
    print "Segmenting the genome into sliding windows\n";
-   system ("Rscript genome-to-sliding-window.r $chromsize_file $sliding_w_size $sliding_w_step $output_dir $chrom");
+   system ("genome-to-sliding-window.r $chromsize_file $sliding_w_size $sliding_w_step $output_dir $chrom");
 
    print "Overlapping breakpoints with sliding windows\n";
    system ("intersectBed -wao -a $output_dir/processed_data/genome.segments.bed -b $output_dir/processed_data/all_bp.bed > $output_dir/processed_data/genome.segments.with.bps.bed");
@@ -424,18 +424,18 @@ sub identify_peaks
    @chr_files = sort @chr_files;
    foreach (@chr_files) { 
    	my $chr = $_;
-	system ("Rscript summarize-sample-count.r $chr $output_dir"); 
+	system ("summarize-sample-count.r $chr $output_dir"); 
    }
    
    ### combine all counts for all chromosomes
-   system("Rscript combine-counts-files.r $output_dir");
+   system("combine-counts-files.r $output_dir");
 
    ### remove folders 
    system ("rm -rf $output_dir/processed_data/counts");
    system ("rm -rf $output_dir/processed_data/segments_with_bps_per_chr");
    
    print "\nCall structural variant peaks (hotspots)\n";
-   system ("Rscript detect-peaks.r $sv_type $chrom $peakPick_win $peakPick_minsd $pct_samples_t $output_dir $merge_dist $genes_of_int $chromsize_file");
+   system ("detect-peaks.r $sv_type $chrom $peakPick_win $peakPick_minsd $pct_samples_t $output_dir $merge_dist $genes_of_int $chromsize_file");
 
    ### remove intermediate files 
    unlink("$output_dir/processed_data/genome.segments.bed"); 
@@ -454,7 +454,7 @@ sub annotate_peaks
   
    system("annotate_peaks.sh $genome $region_of_int $output_dir $num_nearby_genes"); 
    print ("Summarizing annotated peaks...");
-   system ("Rscript summarize_peaks_results.r $output_dir $region_of_int $roi_lbl $expr_file"); 
+   system ("summarize_peaks_results.r $output_dir $region_of_int $roi_lbl $expr_file"); 
 }
 
 
@@ -468,7 +468,7 @@ sub determine_association
    print "-------------------------------------------------------------------------------------\n";
 
    if ($expr_file & $cn_file) {
-     system ("Rscript determine_gene_association.r $output_dir $expr_file $cn_file $t_amp $t_del $pvalue $t_stat $genes_of_int $genome");
+     system ("determine_gene_association.r $output_dir $expr_file $cn_file $t_amp $t_del $pvalue $t_stat $genes_of_int $genome");
    } else {
      print "To determine the association between SVs and gene expression, both expression and copy number data are required. \n";
      return(); 
@@ -491,11 +491,11 @@ sub visualize_res
    chomp($pks);
    
    if ($expr_file & $cn_file) {
-      system ("Rscript plot_peak_region.r $pks $output_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
+      system ("plot_peak_region.r $pks $output_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
    } elsif (!$expr_file) {
-      system ("Rscript plot_peak_region_with_no_exp.r $pks $output_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
+      system ("plot_peak_region_with_no_exp.r $pks $output_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext ");
    } elsif (!$cn_file) {
-      system ("Rscript plot_peak_region_with_no_cn.r $pks $output_dir $sv_file $output_dir $expr_file $region_of_int $chip_cov $chip_cov_lbl $left_ext $right_ext ");
+      system ("plot_peak_region_with_no_cn.r $pks $output_dir $sv_file $output_dir $expr_file $region_of_int $chip_cov $chip_cov_lbl $left_ext $right_ext ");
    }
 
 }

@@ -69,9 +69,11 @@ print "---------------------------------------------\n";
 #}
 
 if ($expr_file & $cn_file) { 
-   system ("Rscript plot_peak_region.r $peak $res_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
+   system ("plot_peak_region.r $peak $res_dir $sv_file $output_dir $expr_file $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
 } elsif (!$expr_file) {
-   system ("Rscript plot_peak_region_with_no_exp.r $peak $res_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
+   system ("plot_peak_region_with_no_exp.r $peak $res_dir $sv_file $output_dir $cn_file $region_of_int $chip_cov $t_amp $t_del $chip_cov_lbl $left_ext $right_ext");
+} elsif (!$cn_file) {
+   system ("plot_peak_region_with_no_cn.r $pks $output_dir $sv_file $output_dir $expr_file $region_of_int $chip_cov $chip_cov_lbl $left_ext $right_ext ");
 }
 
 my $output_folder = $output_dir;
