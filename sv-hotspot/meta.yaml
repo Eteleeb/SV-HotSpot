@@ -23,7 +23,7 @@ requirements:
     - perl >=5.10
     - perl-list-moreutils
     - bedtools ==2.29.1
-    - r-base
+    - r-base >=3.1.0
     - r-ggplot2
     - r-peakPick
     - r-reshape2
@@ -38,7 +38,7 @@ requirements:
     - perl >=5.10
     - perl-list-moreutils
     - bedtools ==2.29.1
-    - r-base
+    - r-base >=3.1.0
     - r-ggplot2
     - r-peakPick
     - r-reshape2 
