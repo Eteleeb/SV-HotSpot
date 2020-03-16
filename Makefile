@@ -22,7 +22,7 @@ svhotspot: $(CONDA)
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'perl>=5.10'
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'perl-list-moreutils'
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) bedtools
-	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'r-base'
+	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) 'r-base>=3.1.0'
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-ggplot2
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-peakPick
 	$(CONDA) install -v --yes --prefix $(SVHOTSPOT_ENV) r-reshape2 
