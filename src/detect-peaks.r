@@ -13,9 +13,11 @@ peakPick.win = as.numeric(args[3])
 peakPick.minsd = as.numeric(args[4])
 pct.samples.cutoff = as.numeric(args[5])
 out.dir = args[6]
-distance = as.numeric(args[7])
-genes.of.int <- args[8]
-chr.size.file = args[9]
+#distance = as.numeric(args[7])
+merg.pct.samp = as.numeric(args[7])
+stop.merge.num.peaks = as.numeric(args[8])
+genes.of.int <- args[9]
+chr.size.file = args[10]
 
 ### read all break points
 bp = read.table(paste0(out.dir,'/processed_data/all_bp.bed'), header=F, sep='\t', quote='', stringsAsFactors=F)
@@ -53,13 +55,17 @@ if (genes.of.int !=0) {
 
 ###################### FUNCTION CAL PEAKS USING peakPick algorithm ############################
 pp <- function(x) {
-    mat = as.matrix(data.frame(a=1, b=x$pct.samples))
-    h <- detect.spikes(mat, roi=c(peakPick.win+1, nrow(x)-peakPick.win-1), winlen=peakPick.win, spike.min.sd=peakPick.minsd)
+   mat = as.matrix(data.frame(a=1, b=x$pct.samples))
+   if (nrow(x) > peakPick.win) {
+     h <- detect.spikes(mat, roi=c(peakPick.win+1, nrow(x)-peakPick.win-1), winlen=peakPick.win, spike.min.sd=peakPick.minsd)
+   } else {
+     h <- peakpick(mat, 10, peak.npos=5)
+   }
     return (h)
 }
 ###############################################################################################
 
-######################## FUNCTION CAL PEAKS USING smoothed z-score ############################
+############################### CALL PEAKS USING smoothed z-score #############################
 ThresholdingAlgo <- function(y,lag,threshold,influence) {
   signals <- rep(0,length(y))
   filteredY <- y[0:lag]
@@ -102,47 +108,141 @@ computePCT.samples <- function(data, group.data) {
 ###############################################################################################
 
 ############################# FUNCTION TO GROUP NEAREST PEAKS #################################
-groupPeaks <- function(x, d){
-    x = x[order(x$pos),]
-    peaks =  which(x$peak)
-    last.peak = peaks[1]
-    x$group = NA
-    group = 1
-    for (pk in peaks){
-        if (x$pos[pk] > x$pos[last.peak] + d){
-            group = group + 1
-        }
+groupPeaks <- function(x, merge.pct.samples, new.pks.cutoff){
+  
+  x = x[order(x$pos),]
+  top.peak = x$pos[x$pct.samples == max(x$pct.samples)]
+  if (length(top.peak) > 1) {
+    top.peak = sample(top.peak, 1)
+  }
+  top.peak = which(x$pos == top.peak)
+  top.pct.samples <- x[top.peak, 'pct.samples']
+  #peaks = x$pos  ### will be deleted 
+  peaks =  which(x$peak)
+  peaks = peaks[peaks != top.peak]
+  first.top.peak = top.peak
+  
+  x$group = NA
+  group = 1
+  x$group[top.peak] = 1
+  left.peaks <- peaks[peaks < top.peak]
+  right.peaks <- peaks[peaks > top.peak]
+  
+  ### loop through peaks located at the left to the top peak
+  num.new.peak = 0
+  for (pk in rev(left.peaks)){
+    
+    if ( abs((x$pct.samples[pk]  - top.pct.samples)) > merge.pct.samples) {
+      num.new.peak = num.new.peak + 1
+      if (num.new.peak > new.pks.cutoff) {
+        group = group + 1
+        top.peak = pk
+        top.pct.samples <- x[top.peak, 'pct.samples']
+        num.new.peak = 0
+      } else {
         x$group[pk] = group
-        last.peak = pk
+      }
+      
     }
-
-    num.peak.groups = length(unique(x$group[!is.na(x$group)]))
-    cat('Number of peaks: ', num.peak.groups, '\n')
-    
-    ## keep max peaks 
-    #x = as.data.table(x[!is.na(x$group), ])
-    #x = as.data.frame(x[x[, .I[pct.samples == max(pct.samples)], by = group]$V1])
-    
-    # produce bed file
-    gr = NULL
-    if (num.peak.groups > 0){
-        z = x[order(x$pos),]
-        start = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'start', 'group')]
-        z = z[order(z$pos, decreasing=T),]
-        stop = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'stop', 'group')]
-        gr = merge(start, stop)
-        gr = gr[order(gr$group),]
-        ### compute number and percentage of samples 
-        num.pct.samples = computePCT.samples(z, gr)
-        #z = z[order(z$pct.samples, decreasing=T),]
-        #z = z[!is.na(z$group) & !duplicated(z$group),]
-        gr = merge(gr, num.pct.samples, sort =F)
-        #gr = merge(gr, z[, c('group', 'num.samples','pct.samples', 'sample')])
-        gr = gr[, c('chr', 'start', 'stop', 'group', 'num.samples', 'pct.samples','sample')]
+    x$group[pk] = group
+  }
+  
+  ### loop through peaks located at the right of the top peak
+  top.peak = first.top.peak
+  top.pct.samples <- x[top.peak, 'pct.samples']
+  last.group = group 
+  group = 1
+  num.new.peak = 0
+  for (k in 1:length(right.peaks)){
+    pk = right.peaks[k]
+    if ( abs((x$pct.samples[pk]  - top.pct.samples)) > merge.pct.samples) {
+      num.new.peak = num.new.peak + 1
+      if (num.new.peak > new.pks.cutoff) {
+        last.group = last.group + 1
+        top.peak = pk
+        top.pct.samples <- x[top.peak, 'pct.samples']
+        x$group[pk] = last.group
+        group = last.group
+        num.new.peak = 0
+      } else {
+        x$group[pk] = group
+      }
+      
+    } else {
+      x$group[pk] = group
     }
-
-    return(list(x=x, group=gr))
+    
+  }
+  
+  num.peak.groups = length(unique(x$group[!is.na(x$group)]))
+  cat('Number of peaks: ', num.peak.groups, '\n')
+  
+  ## keep max peaks 
+  #x = as.data.table(x[!is.na(x$group), ])
+  #x = as.data.frame(x[x[, .I[pct.samples == max(pct.samples)], by = group]$V1])
+  
+  # produce bed file
+  gr = NULL
+  if (num.peak.groups > 0){
+    z = x[order(x$pos),]
+    start = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'start', 'group')]
+    z = z[order(z$pos, decreasing=T),]
+    stop = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'stop', 'group')]
+    gr = merge(start, stop)
+    gr = gr[order(gr$group),]
+    ### compute number and percentage of samples 
+    num.pct.samples = computePCT.samples(z, gr)
+    #z = z[order(z$pct.samples, decreasing=T),]
+    #z = z[!is.na(z$group) & !duplicated(z$group),]
+    gr = merge(gr, num.pct.samples, sort =F)
+    #gr = merge(gr, z[, c('group', 'num.samples','pct.samples', 'sample')])
+    gr = gr[, c('chr', 'start', 'stop', 'group', 'num.samples', 'pct.samples','sample')]
+  }
+  
+  return(list(x=x, group=gr))
 }
+
+# groupPeaks <- function(x, d){
+#     x = x[order(x$pos),]
+#     peaks =  which(x$peak)
+#     last.peak = peaks[1]
+#     x$group = NA
+#     group = 1
+#     for (pk in peaks){
+#         if (x$pos[pk] > x$pos[last.peak] + d){
+#             group = group + 1
+#         }
+#         x$group[pk] = group
+#         last.peak = pk
+#     }
+# 
+#     num.peak.groups = length(unique(x$group[!is.na(x$group)]))
+#     cat('Number of peaks: ', num.peak.groups, '\n')
+#     
+#     ## keep max peaks 
+#     #x = as.data.table(x[!is.na(x$group), ])
+#     #x = as.data.frame(x[x[, .I[pct.samples == max(pct.samples)], by = group]$V1])
+#     
+#     # produce bed file
+#     gr = NULL
+#     if (num.peak.groups > 0){
+#         z = x[order(x$pos),]
+#         start = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'start', 'group')]
+#         z = z[order(z$pos, decreasing=T),]
+#         stop = z[!is.na(z$group) & !duplicated(z$group), c('chr', 'stop', 'group')]
+#         gr = merge(start, stop)
+#         gr = gr[order(gr$group),]
+#         ### compute number and percentage of samples 
+#         num.pct.samples = computePCT.samples(z, gr)
+#         #z = z[order(z$pct.samples, decreasing=T),]
+#         #z = z[!is.na(z$group) & !duplicated(z$group),]
+#         gr = merge(gr, num.pct.samples, sort =F)
+#         #gr = merge(gr, z[, c('group', 'num.samples','pct.samples', 'sample')])
+#         gr = gr[, c('chr', 'start', 'stop', 'group', 'num.samples', 'pct.samples','sample')]
+#     }
+# 
+#     return(list(x=x, group=gr))
+# }
 ################################################################################################
 
 ######################### FUNCTION TO GENERATE UCSC CUSTOM TRACKS ##############################
@@ -177,6 +277,11 @@ for (chr in chrs){
     x$peak[which(h[,2])] = T
     x$peak[x$pct.samples < pct.samples.cutoff] = F
     
+    ### check if there were any peaks identified, otherwise skip 
+    if (length(x$peak[x$peak])==0) {
+      next 
+    }
+    
     ### call peaks using percentage of samples cutoff
     #x$peak = F
     #x$peak[x$pct.samples >= pct.samples.cutoff] = T
@@ -191,8 +296,9 @@ for (chr in chrs){
     #x$peak[x$pct.samples < pct.samples.cutoff] = F
 
     ### group nearby peaks 
-    z = groupPeaks(x, distance)
-
+    #z = groupPeaks(x, distance)
+    z = groupPeaks(x, merg.pct.samp, stop.merge.num.peaks)
+     
     ### write the results of the current chromosome
     write.table(z$group, file=paste0(out.dir, '/', chr, '.peak.group.bed'), sep='\t', quote=F, row.names=F)
     write.table(z$x, file=paste0(out.dir, '/', chr, '.peak.bed'), sep='\t', quote=F, row.names=F)
