@@ -1,0 +1,269 @@
+{
+  "paths": [
+    {
+      "_path": "annotations/cytoband_info/dm3.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "8fa1d42863234efedc488de93cd2fa842f500b5b063645dccc93279b09bab204",
+      "size_in_bytes": 46320
+    },
+    {
+      "_path": "annotations/cytoband_info/dm6.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "ea23151c1e7fb552300bd74d1497f1a210858a43f30bdb78be55343b80ffcba4",
+      "size_in_bytes": 56735
+    },
+    {
+      "_path": "annotations/cytoband_info/hg18.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "718f6f77c379431e8f81cd1a20444e4739ef78916ddc8a2429af508f24ad8adc",
+      "size_in_bytes": 6196
+    },
+    {
+      "_path": "annotations/cytoband_info/mm9.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "8f270a3c619ae3746467c7f093e1cc2f38266890a7296219a1dbec60222b2ad6",
+      "size_in_bytes": 4099
+    },
+    {
+      "_path": "annotations/cytoband_info/rn5.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "4f9ca927ad0dc77d091c227c2916f7469fe50f707d144f2ebc155287dc705e9c",
+      "size_in_bytes": 2385
+    },
+    {
+      "_path": "annotations/cytoband_info/rn6.cytoBand.txt.gz",
+      "path_type": "hardlink",
+      "sha256": "6b223abc9b54ca625d895ac7f55e1fa41cbad802dafa3dee37ebc805005b2e44",
+      "size_in_bytes": 8607
+    },
+    {
+      "_path": "annotations/dm3/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "c486d39589a44b50eab631ae9e61b12ffdc3f4065af44fc5d5c1074a86211553",
+      "size_in_bytes": 239
+    },
+    {
+      "_path": "annotations/dm6/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "c5ffa9e4936795ce9421eee712d878a71d8cf8e02b633d3f7328826cef630b45",
+      "size_in_bytes": 45066
+    },
+    {
+      "_path": "annotations/genes-of-interest.txt",
+      "path_type": "hardlink",
+      "sha256": "b6a7d8d948fc71f725bcb3f97ba3e7a2084b5feecdd06174e6b1c7c126d48a0b",
+      "size_in_bytes": 3810
+    },
+    {
+      "_path": "annotations/hg18/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "927cb27ee0274c1598f526ea51520ebdd867586f913c7c7ee17396d0ba1dec01",
+      "size_in_bytes": 866
+    },
+    {
+      "_path": "annotations/hg19/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "a5cd062b55f475ba77eb436197c9a04eaefb49bacd4b94776187b73e50bc522b",
+      "size_in_bytes": 387
+    },
+    {
+      "_path": "annotations/hg19/genes.bed",
+      "path_type": "hardlink",
+      "sha256": "ddf9dc517fa2952924719b9a49d7de2a3aecd28b33458c335bf7775431f91642",
+      "size_in_bytes": 1055003
+    },
+    {
+      "_path": "annotations/hg38/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "a8e64f702c8246bf0fbf313658c2711eeed21e377e00412e4246c842f21d267c",
+      "size_in_bytes": 387
+    },
+    {
+      "_path": "annotations/hg38/genes.bed",
+      "path_type": "hardlink",
+      "sha256": "8c69d4f4a950495ef1d796ba47056936a4613d478ba334dd4ec3e0504ed3630b",
+      "size_in_bytes": 1156728
+    },
+    {
+      "_path": "annotations/mm10/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "ad7d2e8dfb2183703864e4996c199ffdae2645e9d8e3c60161618c71b844671c",
+      "size_in_bytes": 1416
+    },
+    {
+      "_path": "annotations/mm9/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "2c6fb0e75dd884a6d6c469633eff04a78856f3c27868ab4c9d7506f53ab05f59",
+      "size_in_bytes": 595
+    },
+    {
+      "_path": "annotations/rn5/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "6f210d33005e3c654d7c66d62ffade538197646cf7454c332f9e9cd77bf0d90e",
+      "size_in_bytes": 70835
+    },
+    {
+      "_path": "annotations/rn6/chromsize.tsv",
+      "path_type": "hardlink",
+      "sha256": "2be27c3a0486a542370108803056b07de509637bd99b36ec2475eb038655dc9f",
+      "size_in_bytes": 24571
+    },
+    {
+      "_path": "bin/annotate_peaks.sh",
+      "path_type": "hardlink",
+      "sha256": "b6c3f707a2994c1677a3ea4f3c1c9a4c1ca4bde212bf482fa9539ac39f1b127f",
+      "size_in_bytes": 6727
+    },
+    {
+      "_path": "bin/combine-counts-files.r",
+      "path_type": "hardlink",
+      "sha256": "636b0d6580e680f40fbfb57aacb207090e44b6ad83247068a75b6ec4c72c4923",
+      "size_in_bytes": 398
+    },
+    {
+      "_path": "bin/combine_roi_files.r",
+      "path_type": "hardlink",
+      "sha256": "1cde79f78c46515bd1d6dae7aa414aead4b0c4c51c3c33bbc1e967584ec34103",
+      "size_in_bytes": 1127
+    },
+    {
+      "_path": "bin/detect-peaks.r",
+      "path_type": "hardlink",
+      "sha256": "ce108ea3e8e6c6b29dce12b50d4eb2ef86346d8abb9cdffbd526c078867c31e3",
+      "size_in_bytes": 14892
+    },
+    {
+      "_path": "bin/determine_gene_association.r",
+      "path_type": "hardlink",
+      "sha256": "93ee4d764ae19208aaab95c49788c5dab2837a6605894f9105248c18281e63da",
+      "size_in_bytes": 31662
+    },
+    {
+      "_path": "bin/filter.r",
+      "path_type": "hardlink",
+      "sha256": "4f1eb7916f3fc21a6ea6edc53bf685b8efc176b75758cefec00749980ba429b6",
+      "size_in_bytes": 9565
+    },
+    {
+      "_path": "bin/generate-bedpe-for-DEL-DUP.r",
+      "path_type": "hardlink",
+      "sha256": "51b3b2051c7e77ee3b41e4e7141b538d242cab2f562d1350051408b9f0e7d5b6",
+      "size_in_bytes": 1020
+    },
+    {
+      "_path": "bin/genome-to-sliding-window.r",
+      "path_type": "hardlink",
+      "sha256": "baa5d2d74e92e940761a35e4aeb4157889c8a435860f86c89bcfb873c6a6ca95",
+      "size_in_bytes": 1410
+    },
+    {
+      "_path": "bin/plot-peak.pl",
+      "path_type": "hardlink",
+      "sha256": "b09b43d362e073e76e843ea1de34605bf5218a830c83ceb555c79a77b9347e0c",
+      "size_in_bytes": 6110
+    },
+    {
+      "_path": "bin/plot_peak_region.r",
+      "path_type": "hardlink",
+      "sha256": "b76722badaff1f4703ba523e3b24a296b43f21ac3df2acba40bbb3746e9041c4",
+      "size_in_bytes": 57870
+    },
+    {
+      "_path": "bin/plot_peak_region_using_dom.r",
+      "path_type": "hardlink",
+      "sha256": "903e8a78e2a71428dfbd162d316bacda1002b0ac86cb6559a0ce27f82ff6e26e",
+      "size_in_bytes": 33192
+    },
+    {
+      "_path": "bin/plot_peak_region_with_no_cn.r",
+      "path_type": "hardlink",
+      "sha256": "ae6268763f92662e7ccada15182230afec25c273cb7b9425e58280a4fd05aad3",
+      "size_in_bytes": 22502
+    },
+    {
+      "_path": "bin/plot_peak_region_with_no_exp.r",
+      "path_type": "hardlink",
+      "sha256": "595707135cbe657716a99db8874755ce27f294b66777506ec2e4ced739d7e525",
+      "size_in_bytes": 21927
+    },
+    {
+      "_path": "bin/plot_peaks.r",
+      "path_type": "hardlink",
+      "sha256": "1076bee134095a6ec1d3a6a1f50cbf45255a4cc288b8fcb09b106ff9bd3fa789",
+      "size_in_bytes": 43402
+    },
+    {
+      "_path": "bin/plot_whole_genome.r",
+      "path_type": "hardlink",
+      "sha256": "8fa7525a5132b58968dc066d7e7c9ae50c9f966b07338059a1f4947108844186",
+      "size_in_bytes": 13612
+    },
+    {
+      "_path": "bin/process_chip_cov.r",
+      "path_type": "hardlink",
+      "sha256": "fc0688fab69ebe17f955deef3848447fa8624efce7ae0053be8f659e56e10a39",
+      "size_in_bytes": 2075
+    },
+    {
+      "_path": "bin/select-rows.pl",
+      "path_type": "hardlink",
+      "sha256": "76a1ca709de00971b9fe64b112888b06ba34cbce24e598c52e61fa92de653ce9",
+      "size_in_bytes": 1427
+    },
+    {
+      "_path": "bin/summarize-sample-count.r",
+      "path_type": "hardlink",
+      "sha256": "81eaa60861572d42434a6c16071352c93848b4fd48b0b134bad438fe030e9475",
+      "size_in_bytes": 3078
+    },
+    {
+      "_path": "bin/summarize-sample-count_v2.r",
+      "path_type": "hardlink",
+      "sha256": "d0c004e3d8ee321b41a39af356032f80b7743f637d01d931c65bff2fceb4c3b4",
+      "size_in_bytes": 3623
+    },
+    {
+      "_path": "bin/summarize_peaks_results.r",
+      "path_type": "hardlink",
+      "sha256": "f27582bebb93b41bf010417917d4706e857f2b2fb544719f4803333f43879219",
+      "size_in_bytes": 5880
+    },
+    {
+      "_path": "bin/sv-hotspot.pl",
+      "path_type": "hardlink",
+      "sha256": "bd074dbfd0c4a72a5f2a5c477e42984c9b3076e5fd72049a2626b9e9baa2eefd",
+      "size_in_bytes": 29553
+    },
+    {
+      "_path": "test_data/H3K27ac.bg",
+      "path_type": "hardlink",
+      "sha256": "c679f00a8f63d190e461045dbcd5a110179704b59dfd75ddca609de920c70a0f",
+      "size_in_bytes": 1411070
+    },
+    {
+      "_path": "test_data/cna.tsv",
+      "path_type": "hardlink",
+      "sha256": "197a6da3991fc8b74b52825466e05c4fa3bc4464d13918e91e6393726b2717e0",
+      "size_in_bytes": 155770
+    },
+    {
+      "_path": "test_data/enhancers.bed",
+      "path_type": "hardlink",
+      "sha256": "667238fa32d4aeac40037d232c80ebe7d54267b89e6482364ae26e7f12dfca18",
+      "size_in_bytes": 207241
+    },
+    {
+      "_path": "test_data/exp.tsv",
+      "path_type": "hardlink",
+      "sha256": "31b521817c40ae51ac93a848e12a0d39d7f21f77811e1943179ecd20985a4f69",
+      "size_in_bytes": 4497
+    },
+    {
+      "_path": "test_data/sv.bedpe",
+      "path_type": "hardlink",
+      "sha256": "7772f896ff7fcc173f41486874864c2ae14d98a1e11676aba8b20b5e87e6be08",
+      "size_in_bytes": 132657
+    }
+  ],
+  "paths_version": 1
+}

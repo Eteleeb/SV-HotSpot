@@ -1,0 +1,47 @@
+{
+  "channeldata_version": 1,
+  "packages": {
+    "sv-hotspot": {
+      "activate.d": false,
+      "binary_prefix": false,
+      "deactivate.d": false,
+      "description": null,
+      "dev_url": null,
+      "doc_source_url": null,
+      "doc_url": null,
+      "home": "https://github.com/ChrisMaherLab/SV-Hotspot",
+      "icon_hash": null,
+      "icon_url": null,
+      "identifiers": null,
+      "keywords": null,
+      "license": "NA",
+      "post_link": false,
+      "pre_link": false,
+      "pre_unlink": false,
+      "recipe_origin": null,
+      "run_exports": {},
+      "source_git_url": "https://github.com/eteleeb/SV-HotSpot.git",
+      "source_url": null,
+      "subdirs": [
+        "linux-32",
+        "linux-64",
+        "osx-64",
+        "win-32",
+        "win-64"
+      ],
+      "summary": "SV-HotSpot is a Linux-based command-line pipeline that integrates multiple data types (including SVs, gene expression, and regulatory elements) to identify recurrent SVs and assess their potential consequences on the gene expression of nearby genes.",
+      "tags": null,
+      "text_prefix": false,
+      "timestamp": 1588272162,
+      "version": "1.0.0"
+    }
+  },
+  "subdirs": [
+    "linux-32",
+    "linux-64",
+    "noarch",
+    "osx-64",
+    "win-32",
+    "win-64"
+  ]
+}
